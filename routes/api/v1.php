@@ -38,6 +38,10 @@ $api->version('v1', [
         'as' => 'authorizations.update',
         'uses' => 'AuthController@update',
     ]);
+	
+    $api->get('varifyAccount', [
+        'uses' => 'AuthController@varifyAccount',
+    ]);
 
     // need authentication
     $api->group(['middleware' => 'api.auth', 'prefix' => 'auth'], function ($api) {

@@ -5,8 +5,10 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Models\Authorization;
 use App\Models\User;
+use App\Models\Account;
 use App\Transformers\AuthorizationTransformer;
 use App\Jobs\SendRegisterEmail;
+use App\Jobs\SendAccountVarificationEmail;
 
 class AuthController extends BaseController
 {
@@ -36,6 +38,8 @@ class AuthController extends BaseController
      */
     public function login(Request $request)
     {
+
+		
         $validator = \Validator::make($request->all(), [
             'email' => 'required|email',
             'password' => 'required',
@@ -100,6 +104,11 @@ class AuthController extends BaseController
         if ($validator->fails()) {
             return $this->errorBadRequest($validator);
         }
+		
+		$account = Account::create([
+			'email' => $request->get('email'),
+			'hash' => md5( rand(0,1000) ),
+		]);
 
         $password = $request->get('password');
 
@@ -108,7 +117,8 @@ class AuthController extends BaseController
             //'username' => $request->get('username'),
             'password' => app('hash')->make($password),
             'role' => 'user',
-            'active' => 1 // for test, lets activate automatically
+            'active' => 1, // for test, lets activate automatically
+			'account_id' => $account->id,
         ];
         $user = User::create($attributes);
         
@@ -120,7 +130,7 @@ class AuthController extends BaseController
         }
 
         // Send the email after the user has successfully registered
-        dispatch(new SendRegisterEmail($user));
+        dispatch(new SendAccountVarificationEmail($account));
 
         $result['data'] = [
             'user' => $user,
@@ -131,6 +141,16 @@ class AuthController extends BaseController
 
         return $this->response->array($result)->setStatusCode(201);
     }
+	
+	public function varifyAccount(Request $request){
+		$account = Account::where([
+                    ['email', '=', $request->query('email')],
+                    ['hash', '=', $request->query('hash')]
+                ])->first();
+		if($account){
+			return $this->response->array(['success' => true, 'account' => $account]);
+		}
+	}
 
     /**
      * @api {put} /authorizations/current refresh token
@@ -206,7 +226,7 @@ class AuthController extends BaseController
             return $this->errorBadRequest($validator);
         }
         $credentials = $request->only('email', 'password');
-
+		
         // Validation failed to return 401
         if (! $token = \Auth::attempt($credentials)) {
             $this->response->errorUnauthorized(trans('auth.incorrect'));

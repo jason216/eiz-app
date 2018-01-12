@@ -15,7 +15,7 @@ return [
     |
     */
 
-    'driver' => env('MAIL_DRIVER', 'smtp'),
+    'driver' => env('MAIL_DRIVER', 'mailgun'),
 
     /*
     |--------------------------------------------------------------------------
@@ -54,7 +54,7 @@ return [
     |
     */
 
-    'from' => ['address' => 'user@gmail.com', 'name' => 'user'],
+    'from' => ['address' => 'postmaster@sandboxecdfd25f2f62436e9982217fc2f85004.mailgun.org', 'name' => 'iCubic'],
 
     /*
     |--------------------------------------------------------------------------
@@ -80,7 +80,7 @@ return [
     |
     */
 
-    'username' => env('MAIL_USERNAME'),
+    'username' => 'postmaster@sandboxecdfd25f2f62436e9982217fc2f85004.mailgun.org',//env('MAIL_USERNAME'),
 
     /*
     |--------------------------------------------------------------------------
@@ -93,7 +93,7 @@ return [
     |
     */
 
-    'password' => env('MAIL_PASSWORD'),
+    'password' => '5b1a53e293b4fffe40c84057f30c226c',//env('MAIL_PASSWORD'),
 
     /*
     |--------------------------------------------------------------------------
